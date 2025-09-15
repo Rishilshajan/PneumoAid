@@ -12,3 +12,4 @@ Werkzeug
 python-dotenv
 requests
 setuptools
+gunicorn
