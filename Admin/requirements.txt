@@ -1,0 +1,14 @@
+Flask
+flask-cors
+Flask-PyMongo
+pymongo
+cloudinary
+blinker
+click
+itsdangerous
+Jinja2
+MarkupSafe
+Werkzeug
+python-dotenv
+requests
+setuptools
