@@ -12,4 +12,8 @@ Werkzeug
 python-dotenv
 requests
 setuptools
+<<<<<<< HEAD
 gunicorn
+=======
+gunicorn
+>>>>>>> 35d1b0d0219d17035b67134584112937fdd5bc56
