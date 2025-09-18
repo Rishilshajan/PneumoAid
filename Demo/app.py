@@ -33,61 +33,27 @@ cloudinary.config(
 
 
 # ======================== AUTHENTICATION ROUTES ========================
-@app.route('/', methods=['GET', 'POST'])
-def login():
-    if session.get('logged_in'):
-        return redirect(url_for('dashboard'))
-    
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-
-        ADMIN_USERNAME = os.getenv("Admin_Username")
-        ADMIN_PASSWORD = os.getenv("Admin_Password")
-
-        print(f"DEBUG: ADMIN_USERNAME = '{ADMIN_USERNAME}'")
-        print(f"DEBUG: ADMIN_PASSWORD = '{ADMIN_PASSWORD}'")
-
-        # Check if environment variables were loaded correctly
-        if ADMIN_USERNAME is None or ADMIN_PASSWORD is None:
-            print("Error: Admin credentials not found in environment variables.")
-            flash('Login service error. Please try again later.', 'error')
-            return redirect(url_for('login'))
-
-        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
-            session['logged_in'] = True
-            return redirect(url_for('dashboard'))
-        else:
-            flash('Invalid credentials', 'error')
-            return redirect(url_for('login'))
-            
-    return render_template('login.html')
-
 @app.route('/logout')
 def logout():
-    session.pop('logged_in', None)
     flash('You have been logged out', 'info')
     return redirect(url_for('login'))
 
 # ======================== DASHBOARD ROUTES ========================
-@app.route('/dashboard')
+@app.route('/')
 def dashboard():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     return render_template('index.html')
+
+@app.route('/dashboard')
+def dash_board():
+    return render_template('index.html')    
 
 # ======================== CLINIC MANAGEMENT ROUTES ========================
 @app.route('/clinics')
 def clinics_page():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
     return render_template('clinics.html')
 
 @app.route('/api/clinics', methods=['GET', 'POST'])
-def handle_clinics():
-    if not session.get('logged_in'):
-        return jsonify({'error': 'Unauthorized'}), 401
-    
+def handle_clinics():    
     try:
         if request.method == 'POST':
             # Handle file upload to Cloudinary
@@ -180,9 +146,6 @@ def get_stats():
 
 @app.route('/api/patient-analytics')
 def get_patient_analytics():
-    if not session.get('logged_in'):
-        return jsonify({'error': 'Unauthorized'}), 401
-
     try:
         # Aggregate patient count by date
         pipeline = [
@@ -212,9 +175,6 @@ def get_patient_analytics():
 
 @app.route('/api/hospital-distribution')
 def get_hospital_distribution():
-    if not session.get('logged_in'):
-        return jsonify({'error': 'Unauthorized'}), 401
-
     try:
         pipeline = [
             {

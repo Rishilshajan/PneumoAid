@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PneumoAid</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2A4365;
+            --secondary: #718096;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+            background: #f7fafc;
+        }
+
+        .sidebar {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+        }
+        .chart-container h3 {
+            margin: 0 0 15px 0;
+            color: var(--primary);
+            font-size: 1.2rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .main-content {
+            padding: 20px;
+            display: grid;
+            gap: 25px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .stat-loading {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.8em;
+            color: var(--secondary);
+        }
+
+        .analytics-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 25px;
+        }
+
+        .hospital-distribution {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        #patientChart {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .trend-up { color: #48BB78; }
+        .trend-down { color: #F56565; }
+
+        .nav-item {
+            padding: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .nav-item:hover {
+            background: #2C5282;
+        }
+
+        .error-message {
+            color: #F56565;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        /* New CSS for the Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .modal-buttons {
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #confirmYes {
+            background-color: #F56565;
+            color: white;
+        }
+
+        #confirmNo {
+            background-color: #718096;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>PneumoAid</h2>
+        <div class="nav-item" onclick="showDashboard()">Dashboard</div>
+        <div class="nav-item" onclick="showClinics()">Clinics</div>
+        <div class="nav-item" onclick="confirmLogout()">Logout</div>
+    </div>
+
+    <div class="main-content">
+        <div class="stats-grid">
+            <div class="stat-card" id="totalHospitals">
+                <h3>Total Hospitals</h3>
+                <h1>Loading...</h1>
+                <span id="hospitalTrend"></span>
+                <div class="stat-loading">Updating...</div>
+            </div>
+            <div class="stat-card" id="patientsLogged">
+                <h3>Patients Logged</h3>
+                <h1>Loading...</h1>
+                <span id="patientTrend"></span>
+                <div class="stat-loading">Updating...</div>
+            </div>
+            <div class="stat-card" id="totalPlaces">
+                <h3>Total Places</h3>
+                <h1>Loading...</h1>
+                <span id="placesTrend"></span>
+                <div class="stat-loading">Updating...</div>
+            </div>
+            <div class="stat-card" id="appointments">
+                <h3>Today's Appointments</h3>
+                <h1>Loading...</h1>
+                <div class="stat-loading">Updating...</div>
+            </div>
+            </div>
+            
+            <div class="analytics-section">
+                <div class="chart-container">
+                    <h3>Patient Analytics</h3>
+                    <canvas id="patientChart" height="400"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Hospital Distribution</h3>
+                    <canvas id="distributionChart" height="400"></canvas>
+                </div>
+            </div>
+            </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="modal">
+        <div class="modal-content">
+            <h3>Confirm Logout</h3>
+            <p>Are you sure you want to log out?</p>
+            <div class="modal-buttons">
+                <button id="confirmYes" onclick="performLogout()">Yes</button>
+                <button id="confirmNo" onclick="cancelLogout()">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let patientChartInstance = null;
+        let distributionChartInstance = null;
+
+        async function fetchData() {
+    try {
+        // Fetch and update stats
+        const statsRes = await fetch('/api/stats');
+        if (!statsRes.ok) throw new Error('Failed to fetch stats');
+        const stats = await statsRes.json();
+
+        // Update stats cards (keep existing code)
+        updateCard('totalHospitals', stats.totalHospitals, stats.hospitalsTrend, 'Total Hospitals', 'from last month');
+        updateCard('patientsLogged', stats.patientsLoggedIn, stats.patientsTrend, 'Patients Logged', 'from yesterday');
+        updateCard('totalPlaces', stats.totalPlaces, stats.placesTrend, 'Total Places', 'from last week');
+        updateCard('appointments', stats.todaysAppointments, null, 'Today\'s Appointments', '');
+
+        // Fetch charts data
+        const [analyticsRes, distributionRes] = await Promise.all([
+            fetch('/api/patient-analytics'),
+            fetch('/api/hospital-distribution')
+        ]);
+
+        const analytics = await analyticsRes.json();
+        const distribution = await distributionRes.json();
+
+        // Update Patient Chart
+        if (patientChartInstance) {
+            patientChartInstance.data.labels = analytics.map(a => a.day);
+            patientChartInstance.data.datasets[0].data = analytics.map(a => a.newPatients);
+            patientChartInstance.update();
+        } else {
+            patientChartInstance = new Chart(document.getElementById('patientChart'), {
+                type: 'line',
+                data: {
+                    labels: analytics.map(a => a.day),
+                    datasets: [{
+                        label: 'New Patients',
+                        data: analytics.map(a => a.newPatients),
+                        borderColor: '#2A4365',
+                        tension: 0.4,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Update Distribution Chart
+        if (distributionChartInstance) {
+            distributionChartInstance.data.labels = distribution.map(d => d.type);
+            distributionChartInstance.data.datasets[0].data = distribution.map(d => d.percentage);
+            distributionChartInstance.update();
+        } else {
+            distributionChartInstance = new Chart(document.getElementById('distributionChart'), {
+                type: 'pie',
+                data: {
+                    labels: distribution.map(d => d.type),
+                    datasets: [{
+                        data: distribution.map(d => d.percentage),
+                        backgroundColor: [
+                            '#2A4365', 
+                            '#4299E1', 
+                            '#48BB78',
+                            '#F56565',
+                            '#ED8936'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+            document.querySelectorAll('.stat-card').forEach(card => {
+                card.innerHTML = `<h3>${card.querySelector('h3')?.innerText || 'Data'}</h3>
+                                 <h1 style="color: #F56565;">Data Unavailable</h1>
+                                 <div class="error-message">${error.message}</div>`;
+            });
+        }
+    }
+
+    function updateCard(elementId, value, trend, label, timePeriod) {
+        const element = document.getElementById(elementId);
+        if(element) {
+            element.innerHTML = `
+                <h3>${label}</h3>
+                <h1>${value ?? 'N/A'}</h1>
+                ${trend !== undefined ? `
+                <span class="${trend >= 0 ? 'trend-up' : 'trend-down'}">
+                    ${timePeriod}
+                </span>` : ''}
+                <div class="stat-loading">Updated: ${new Date().toLocaleTimeString()}</div>
+            `;
+        }
+    }
+
+    function showDashboard() {
+        window.location.href = '/dashboard';
+    }
+
+    function showClinics() {
+        window.location.href = '/clinics';
+    }
+
+    // New functions to handle the modal
+    function confirmLogout() {
+        document.getElementById('logoutModal').style.display = 'flex';
+    }
+
+
+    function cancelLogout() {
+        document.getElementById('logoutModal').style.display = 'none';
+    }
+
+    // Initial load
+    fetchData();
+    // Refresh every 30 seconds
+    setInterval(fetchData, 30000);
+    </script>
+</body>
+</html>
