@@ -15,6 +15,7 @@
 It integrates **AI-powered medical image analysis**, **hospital & clinic management**, and a **voice-enabled chatbot**, making pneumonia diagnosis more **accessible, efficient, and reliable**.  
 
 👉 Live Admin Panel: [PneumoAid Admin](https://pneumoaid-admin.onrender.com)  
+👉 Demo Admin Page: [PneumoAid Demo](https://pneumoaid-demo.onrender.com)
 
 ---
 
