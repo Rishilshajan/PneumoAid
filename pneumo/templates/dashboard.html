@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PneumoAid Clinic - {% block title %}Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/clinic.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="../static/css/clinic.css">
+    <style>
+        :root {
+            --primary: #2A4365;
+            --secondary: #48BB78;
+            --accent: #F56565;
+            --text-dark: #1A202C;
+            --text-light: #718096;
+        }
+
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: 100vh;
+            background: #F8FAFC;
+        }
+
+        .metrics-container {
+    padding: 0rem 0;
+}
+
+.metric-row {
+    display: flex;
+    flex-direction: row;
+    gap: 3rem;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.metric-item {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: white;
+    min-width: 340px;
+    flex-shrink: 0;
+}
+
+.border-blue-500 { background: #3B82F6; }
+.border-green-500 { background: #10B981; }
+.border-yellow-500 { background: #F59E0B; }
+
+.metric-content {
+    flex-grow: 1;
+}
+
+.metric-icon {
+    font-size: 1.8rem;
+    opacity: 0.9;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+    margin: 0;
+}
+
+.text-2xl {
+    font-size: 1.5rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+        .analytics-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+        .clinic-header {
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .content-wrapper {
+            padding: 2rem;
+        }
+
+        
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="clinic-logo">PneumoAid Clinic</div>
+            <nav class="nav-menu">
+                <a href="{{ url_for('patient_assessment') }}" class="nav-item">
+                    <i class="fas fa-user-injured"></i> Patient Assessment
+                </a>
+                <a href="{{ url_for('check_xray') }}" class="nav-item">
+                    <i class="fas fa-x-ray"></i> Check with Xray
+                </a>
+                <a href="{{ url_for('schedule_session') }}" class="nav-item">
+                    <i class="fas fa-calendar-plus"></i> Schedule Sessions
+                </a>
+                <a href="{{ url_for('manage_doctors') }}" class="nav-item">
+                    <i class="fas fa-calendar-plus"></i> Add Doctor
+                </a>
+                <a href="{{ url_for('logout') }}" class="nav-item" onclick="return confirmLogout(event)">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+            
+        </aside>
+
+        <main class="main-content">
+            <header class="clinic-header">
+                <div class="header-actions">
+                    <div class="clinic-info">
+                        Welcome, <span id="hospital-name">{{ session.get('hospital_name', 'Clinic') }}</span>
+                    </div>
+                </div>
+            </header>
+        
+            <div class="content-wrapper">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+               <!-- Clinic Metrics Section -->
+<div class="metrics-container">
+    <div class="metric-row">
+        <div class="metric-item border-blue-500">
+            <div class="metric-content">
+                <p class="text-sm">Today's Patients</p>
+                <p class="text-2xl">{{ metrics.today_patients }}</p>
+            </div>
+            <div class="metric-icon">
+                <i class="fas fa-user-injured"></i>
+            </div>
+        </div>
+
+        <div class="metric-item border-green-500">
+            <div class="metric-content">
+                <p class="text-sm">Completed Appointments</p>
+                <p class="text-2xl">{{ metrics.completed_appointments }}</p>
+            </div>
+            <div class="metric-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+
+        <div class="metric-item border-yellow-500">
+            <div class="metric-content">
+                <p class="text-sm">Pending Appointments</p>
+                <p class="text-2xl">{{ metrics.pending_appointments }}</p>
+            </div>
+            <div class="metric-icon">
+                <i class="fas fa-hourglass-half"></i>
+            </div>
+        </div>
+    </div>
+</div>
+        </main>
+    </div>
+    <script>
+        function confirmLogout(event) {
+            const confirmAction = confirm("Are you sure you want to log out?");
+            if (!confirmAction) {
+                event.preventDefault(); // Cancel the logout
+                return false;
+            }
+            return true; // Proceed with logout
+        }
+    </script>
+    
+    <script src="{{ url_for('static', filename='js/clinic.js') }}"></script>
+</body>
+</html>

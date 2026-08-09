@@ -1,0 +1,526 @@
+<!-- templates/schedule.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ hospital_name }} - Schedule Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-light: #3f37c9;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            background-color: var(--primary);
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+        }
+
+        .btn i {
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            background-color: #e9ecef;
+            color: var(--gray);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ced4da;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .time-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .time-inputs span {
+            color: var(--gray);
+        }
+
+        /* Calendar Styles */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .calendar-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .days-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day {
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            background: white;
+            transition: var(--transition);
+        }
+
+        .calendar-day:hover {
+            box-shadow: var(--shadow);
+        }
+
+        .day-number {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .session-item {
+            background: #e6f7ff;
+            border-left: 3px solid var(--primary);
+            padding: 5px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .session-type {
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        .session-time {
+            color: var(--gray);
+            font-size: 11px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left-color: #28a745;
+        }
+
+        .toast.error {
+            border-left-color: var(--danger);
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .calendar-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .days-header {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ hospital_name }} - Schedule Management</h1>
+            <a href="{{ url_for('clinic_dashboard') }}" class="btn">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="new-session">New Session</button>
+            <button class="tab-btn" data-tab="calendar-view">Calendar View</button>
+        </div>
+
+        <!-- New Session Form -->
+        <div class="tab-content active" id="new-session">
+            <div class="card">
+                <h2>Create New Session</h2>
+                <form id="sessionForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="doctor">Select Doctor</label>
+                            <select id="doctor" name="doctor_id" required>
+                                <option value="">Choose Doctor</option>
+                                {% for doctor in doctors %}
+                                <option value="{{ doctor._id }}">
+                                    {{ doctor.name }} - {{ doctor.specialization }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="date">Session Date</label>
+                            <input type="date" id="date" name="date" required 
+                                   min="{{ datetime.utcnow().strftime('%Y-%m-%d') }}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Time Slot</label>
+                            <div class="time-inputs">
+                                <input type="time" name="start_time" required>
+                                <span>to</span>
+                                <input type="time" name="end_time" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="session-type">Session Type</label>
+                            <select id="session-type" name="session_type" required>
+                                <option value="consultation">Consultation</option>
+                                <option value="procedure">Medical Procedure</option>
+                                <option value="follow-up">Follow-up Visit</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="duration">Patient Slot Duration (minutes)</label>
+                            <input type="number" id="duration" name="duration" 
+                                   min="15" max="120" step="5" value="30" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="max-patients">Maximum Patients</label>
+                            <input type="number" id="max-patients" name="max_patients" 
+                                   min="1" max="50" value="15" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn" style="margin-top: 20px;">
+                        <i class="fas fa-calendar-plus"></i> Create Session
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Calendar View -->
+        <div class="tab-content" id="calendar-view">
+            <div class="card">
+                <div class="calendar-header">
+                    <h3 class="calendar-title" id="currentMonth"></h3>
+                    <div class="calendar-nav">
+                        <button id="prevMonth" class="btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button id="nextMonth" class="btn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="days-header">
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+                </div>
+
+                <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Tab Switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn, .tab-content').forEach(el => {
+                    el.classList.remove('active');
+                });
+                
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+                
+                if (btn.dataset.tab === 'calendar-view') {
+                    loadCalendar();
+                }
+            });
+        });
+
+        // Calendar Logic
+        let currentDate = new Date();
+
+        async function loadCalendar() {
+            const month = currentDate.getMonth() + 1;
+            const year = currentDate.getFullYear();
+            
+            document.getElementById('currentMonth').textContent = 
+                `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
+
+            try {
+                const response = await fetch(`/api/sessions?month=${month}&year=${year}`);
+                const sessions = await response.json();
+                
+                const calendarGrid = document.getElementById('calendarGrid');
+                calendarGrid.innerHTML = '';
+                
+                const firstDay = new Date(year, currentDate.getMonth(), 1).getDay();
+                const daysInMonth = new Date(year, month, 0).getDate();
+
+                // Empty slots for days before the 1st
+                for (let i = 0; i < firstDay; i++) {
+                    calendarGrid.appendChild(createEmptyDay());
+                }
+
+                // Create days
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const daySessions = sessions.filter(s => s.date === dateStr);
+                    calendarGrid.appendChild(createDayElement(day, daySessions));
+                }
+            } catch (error) {
+                showToast('Error loading calendar', 'error');
+            }
+        }
+
+        function createDayElement(dayNumber, sessions) {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'calendar-day';
+            
+            dayElement.innerHTML = `
+                <div class="day-number">${dayNumber}</div>
+                ${sessions.map(session => `
+                    <div class="session-item">
+                        <div class="session-type">${session.session_type}</div>
+                        <div class="session-time">
+                            ${session.start_time} - ${session.end_time}<br>
+                            Dr. ${session.doctor_name}
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+            
+            return dayElement;
+        }
+
+        function createEmptyDay() {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'calendar-day empty';
+            return dayElement;
+        }
+
+        // Form Submission
+        document.getElementById('sessionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/api/sessions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'Failed to create session');
+
+                showToast('Session created successfully!', 'success');
+                e.target.reset();
+                
+                // If on calendar view, refresh it
+                if (document.querySelector('#calendar-view.active')) {
+                    loadCalendar();
+                }
+            } catch (error) {
+                showToast(error.message || 'Error creating session', 'error');
+            }
+        });
+
+        // Calendar Navigation
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            loadCalendar();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            loadCalendar();
+        });
+
+        // Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast show ${type}`;
+            
+            setTimeout(() => {
+                toast.className = 'toast';
+            }, 3000);
+        }
+
+        // Initialize
+        if (document.querySelector('#calendar-view.active')) {
+            loadCalendar();
+        }
+    </script>
+</body>
+</html>

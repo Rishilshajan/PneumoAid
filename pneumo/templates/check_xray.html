@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-ray Analysis | PneumoAid</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-section {
+            border: 2px dashed #ccc;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        #previewImage {
+            max-width: 300px;
+            margin: 20px auto;
+            display: none;
+            border-radius: 8px;
+        }
+
+        #resultSection {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2d70b9 0%, #1a4a76 100%);
+            color: white;
+            box-shadow: 0 4px 6px rgba(45, 112, 185, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(45, 112, 185, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(45, 112, 185, 0.2);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);
+            color: white;
+        }
+
+        .btn-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+            color: #2d70b9;
+            text-align: center;
+        }
+
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #2d70b9;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .diagnosis-text {
+            font-size: 1.2em;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>X-ray Analysis</h1>
+        
+        <div class="upload-section">
+            <input type="file" id="xrayInput" accept="image/*" hidden>
+            <button onclick="document.getElementById('xrayInput').click()" 
+                    class="btn btn-primary">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5M12 4v12m-4-4l4 4 4-4"/>
+                </svg>
+                Choose X-ray Image
+            </button>
+            <p id="fileName" class="file-name"></p>
+            <img id="previewImage" alt="X-ray Preview">
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Analyzing X-ray... (10-15 seconds)</p>
+        </div>
+
+        <button id="analyzeBtn" class="btn btn-success" disabled>
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 21h4V11h5L12 2 5 11h5z"/>
+            </svg>
+            Analyze Image
+        </button>
+
+        <div id="resultSection">
+            <h3>Analysis Results:</h3>
+            <div id="result" class="diagnosis-text"></div>
+        </div>
+    </div>
+
+    <script>
+        const xrayInput = document.getElementById('xrayInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const previewImage = document.getElementById('previewImage');
+        const fileName = document.getElementById('fileName');
+        const loading = document.getElementById('loading');
+        const resultDiv = document.getElementById('result');
+        const saveReportBtn = document.getElementById('saveReportBtn');
+
+        xrayInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.textContent = file.name;
+                analyzeBtn.disabled = false;
+                
+                // Preview image
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    previewImage.src = event.target.result;
+                    previewImage.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        analyzeBtn.addEventListener('click', async () => {
+            const file = xrayInput.files[0];
+            if (!file) return;
+
+            loading.style.display = 'block';
+            analyzeBtn.disabled = true;
+            resultDiv.textContent = '';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/check_xray', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <strong>Diagnosis:</strong> ${data.result}<br>
+                    <strong>Confidence:</strong> ${(data.confidence * 100).toFixed(2)}%
+                `;
+
+                resultDiv.style.backgroundColor = data.result === 'Normal' ? '#e6ffe6' : '#ffe6e6';
+                resultDiv.style.color = data.result === 'Normal' ? '#28a745' : '#dc3545';
+                resultDiv.style.border = `2px solid ${data.result === 'Normal' ? '#28a745' : '#dc3545'}`;
+
+            } catch (error) {
+                resultDiv.innerHTML = `<strong>Error:</strong> ${error.message}`;
+                resultDiv.style.backgroundColor = '#ffe6e6';
+                resultDiv.style.color = '#dc3545';
+                resultDiv.style.border = '2px solid #dc3545';
+            } finally {
+                loading.style.display = 'none';
+                analyzeBtn.disabled = false;
+            }
+        });
+
+        // Save Report Button Hover Effect
+        saveReportBtn.addEventListener('mouseover', () => {
+            saveReportBtn.style.transform = 'translateY(-2px)';
+            saveReportBtn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+        });
+
+        saveReportBtn.addEventListener('mouseout', () => {
+            saveReportBtn.style.transform = 'translateY(0)';
+            saveReportBtn.style.boxShadow = 'none';
+        });
+    </script>
+</body>
+</html>

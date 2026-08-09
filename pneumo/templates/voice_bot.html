@@ -1,0 +1,110 @@
+<!-- Frontend (voice_bot.html) -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pneumo Voice Assistant</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background: #f0f4f7; }
+        .container { max-width: 600px; margin: 2rem auto; padding: 1.5rem; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        #chat-box { height: 400px; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem; margin: 1rem 0; background: #fafafa; }
+        .message { margin: 0.8rem 0; padding: 0.8rem; border-radius: 8px; }
+        .user-message { background: #e3f2fd; margin-left: 20%; }
+        .bot-message { background: #f5f5f5; margin-right: 20%; }
+        button { padding: 0.8rem 1.5rem; border: none; border-radius: 25px; cursor: pointer; transition: all 0.3s; }
+        #voice-btn { background: #2196F3; color: white; position: relative; }
+        .listening::after { content: ''; position: absolute; width: 12px; height: 12px; background: #ff4444; border-radius: 50%; right: 10px; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(0.95); } 70% { transform: scale(1.1); } 100% { transform: scale(0.95); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pneumo Voice Assistant</h1>
+        <div id="chat-box"></div>
+        <button id="voice-btn">🎤 Start Speaking</button>
+        <button onclick="window.location.reload()">🔄 New Session</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const chatBox = document.getElementById('chat-box');
+            const voiceBtn = document.getElementById('voice-btn');
+            let recognition;
+
+            function addMessage(text, isUser = false) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+    msgDiv.innerHTML = `<strong>${isUser ? 'You' : 'Pneumo'}:</strong> ${text}`;
+    chatBox.appendChild(msgDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+
+            function speak(text) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.rate = 1;
+                utterance.pitch = 1;
+                speechSynthesis.speak(utterance);
+            }
+
+            function startListening() {
+                recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+                recognition.continuous = false;
+                recognition.lang = 'en-US';
+                recognition.interimResults = false;
+
+                recognition.onstart = () => {
+                    voiceBtn.classList.add('listening');
+                    addMessage('Listening...');
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    addMessage(transcript, true);
+                    processVoiceInput(transcript);
+                    recognition.stop();
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Recognition error:', event.error);
+                    addMessage('Error processing voice input');
+                };
+
+                recognition.onend = () => {
+                    voiceBtn.classList.remove('listening');
+                };
+
+                recognition.start();
+            }
+
+            async function processVoiceInput(text) {
+                try {
+                    const response = await fetch('/voice', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: text })
+                    });
+
+                    const data = await response.json();
+                    if (data.reply) {
+                        addMessage(data.reply);
+                        speak(data.reply);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    addMessage('Connection error. Please try again.');
+                }
+            }
+
+            voiceBtn.addEventListener('click', () => {
+                if (recognition) recognition.abort();
+                startListening();
+            });
+
+            // ✅ Greet automatically when page loads
+            const greeting = "Hello! I'm Pneumo, your respiratory health assistant. How can I help you today?";
+            addMessage(greeting);
+            speak(greeting);
+        });
+    </script> <!-- Closing script tag -->
+</body>
+</html>

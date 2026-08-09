@@ -2,10 +2,6 @@
 
 node_modules
 
-pneumo
-
-.env
-
 package-lock.json
 
 package.json

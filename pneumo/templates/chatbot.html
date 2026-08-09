@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pneumoid Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chat-container {
+            width: 400px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .chat-box {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            background: #fff;
+        }
+        .user, .assistant {
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .user {
+            background-color: #007bff;
+            color: white;
+            text-align: right;
+        }
+        .assistant {
+            background-color: #e9ecef;
+            color: black;
+            text-align: left;
+        }
+        .input-container {
+            display: flex;
+            margin-top: 10px;
+        }
+        input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 8px;
+            border: none;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            margin-left: 5px;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <h3>Pneumo Health Assistant</h3>
+        <div id="chatBox" class="chat-box"></div>
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Type your message...">
+            <button id="sendButton">Send</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("sendButton").addEventListener("click", function () {
+            const userInput = document.getElementById("userInput").value.trim();
+            if (!userInput) return;
+
+            const chatBox = document.getElementById("chatBox");
+
+            // Add user message
+            const userDiv = document.createElement("div");
+            userDiv.className = "user";
+            userDiv.textContent = userInput;
+            chatBox.appendChild(userDiv);
+
+            // Add typing indicator
+            const typingDiv = document.createElement("div");
+            typingDiv.className = "assistant";
+            typingDiv.textContent = "Pneumo is typing...";
+            chatBox.appendChild(typingDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                chatBox.removeChild(typingDiv);
+                const botDiv = document.createElement("div");
+                botDiv.className = "assistant";
+                botDiv.textContent = data.response;
+                chatBox.appendChild(botDiv);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            })
+            .catch(error => {
+                chatBox.removeChild(typingDiv);
+                const errorDiv = document.createElement("div");
+                errorDiv.className = "assistant";
+                errorDiv.textContent = "Connection error. Please try again.";
+                chatBox.appendChild(errorDiv);
+            });
+
+            document.getElementById("userInput").value = "";
+        });
+
+        // Enter key support
+        document.getElementById("userInput").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") document.getElementById("sendButton").click();
+        });
+    </script>
+
+</body>
+</html>

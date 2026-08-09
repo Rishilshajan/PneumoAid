@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PneumoAid - Smart Pneumonia Detection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #f0f8ff;
+            min-height: 100vh;
+        }
+
+        .hero-section {
+            padding: 4rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #2A4365 0%, #4299E1 100%);
+            color: white;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .hero-subtitle {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 3rem;
+            color: #e0f2fe;
+        }
+
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .auth-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 300px;
+            transition: transform 0.3s ease;
+        }
+
+        .auth-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .auth-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #2A4365;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-hospital {
+            background: #2A4365;
+            color: white;
+        }
+
+        .btn-hospital:hover {
+            background: #1E2E4A;
+        }
+
+        .btn-user {
+            background: #48BB78;
+            color: white;
+        }
+
+        .btn-user:hover {
+            background: #38A169;
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">PneumoAid</h1>
+            <h2 class="hero-subtitle">Making Every Breath Count</h2>
+            
+            <p class="description">
+                PneumoAid is a smart healthcare solution designed to detect and classify pneumonia early, 
+                helping doctors and patients get quicker and more accurate diagnoses. Our platform tackles 
+                delays in pneumonia detection by providing instant results and comprehensive patient support.
+            </p>
+
+            <div class="auth-container">
+                <div class="auth-card">
+                    <h3 class="auth-title">Hospital Portal</h3>
+                    <p class="auth-description">Access advanced diagnostic tools and patient management</p>
+                    <a href="/hospital-login" class="btn btn-hospital">Hospital Login</a>
+                </div>
+
+                <div class="auth-card">
+                    <h3 class="auth-title">Patient Portal</h3>
+                    <p class="auth-description">Get test results and health recommendations</p>
+                    <a href="/user-login" class="btn btn-user">User Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

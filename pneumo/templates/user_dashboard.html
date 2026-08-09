@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PneumoAid - Smart Healthcare</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .user-button {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: orange; /* Always orange */
+            color: white;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .send{
+            background: #75aeff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="#" class="logo"><span>P</span>neumo <span>A</span>id</a>
+        
+        <nav class="navbar">
+            <ul>
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="#" onclick="confirmLogout()">Logout</a> </li>
+                {% if session.user_logged_in %}
+                <li>
+                    <button class="user-button">
+                        {{ session.user_name[0] if session.user_name else 'U' }}
+                    </button>
+                </li>
+            {% endif %}
+            </ul>
+        </nav>
+        <div class="fas fa-bars"></div>
+    </header>
+
+    <section id="home" class="home">
+        <div class="row">
+            <div class="images">
+                <img src="{{ url_for('static', filename='css/images/home.png') }}" alt="Healthcare Illustration">
+            </div>
+            <div class="content">
+                <h1><span>Stay</span> Safe, <span>Stay</span> Healthy.</h1>
+                <p>Making Every Breath Count with Trusted Pneumonia Care.</p>
+                <a href="{{ url_for('booking') }}"><button class="button">Book an Appointment</button></a>
+                <a href="{{ url_for('chatbot') }}">
+                    <button class="button">Try Chatbot</button>
+                </a>
+                <a href="{{ url_for('voice_assistant') }}"><button class="button">Try Voice Assistant</button></a>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <h1 class="heading">About Our Facility</h1>
+        <h3 class="title">Learn and Explore Our Services</h3>
+        <div class="box-container">
+            <div class="box">
+                <div class="images">
+                    <img src="{{ url_for('static', filename='css/images/about-1.png') }}" alt="">
+                </div>
+                <div class="content">
+                    <h3>Comprehensive Diagnostic Tool</h3>
+                    <p>PneumoAid leverages cutting-edge imaging technology to deliver quick and reliable pneumonia diagnoses, ensuring patients receive timely medical attention and treatment.</p> 
+                </div>
+            </div>
+            <div class="box">
+                <div class="images">
+                    <img src="{{ url_for('static', filename='css/images/about-2.png') }}" alt="">
+                </div>
+                <div class="content">
+                    <h3>Empowering Patient Engagement</h3>
+                    <p>With our user-friendly chatbot, patients can actively participate in their health journey, receiving tailored advice and reminders that foster adherence to treatment plans and overall wellness.</p>  
+                </div>
+            </div>
+            <div class="box">
+                <div class="images">
+                    <img src="{{ url_for('static', filename='css/images/about-3.png') }}" alt="">
+                </div>
+                <div class="content">
+                    <h3>Secure and Accessible Records</h3>
+                    <p>We prioritize your privacy by securely storing medical records in our dedicated database, allowing easy access for patients and healthcare providers to facilitate informed decision-making and coordinated care.</p>  
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact">
+        <h1 class="heading">Contact Us</h1>
+        <h3 class="title">We're Here to Help</h3>
+        <div class="row">
+            <div class="images">
+                <img src="{{ url_for('static', filename='css/images/form.png') }}" alt="">
+            </div>
+            <form class="form-container" method="POST" action="">
+                <input type="text" placeholder="Full Name" name="name" required>
+                <input type="email" placeholder="Enter Your Email" name="email" required>
+                <input type="number" placeholder="Phone" name="phone" required>
+                <textarea name="message" cols="30" rows="10" required></textarea>
+                <button type="submit" class="send">Send</button>
+            </form>
+        </div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        function confirmLogout() {
+            if (confirm("Are you sure you want to logout?")) {
+                window.location.href = "/";
+            }
+        }
+    </script>
+    
+</body>
+</html>

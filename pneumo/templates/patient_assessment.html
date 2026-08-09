@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Patient Assessment</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/your-kit-code.js"></script>
+    <style>
+        /* Add light blue background to the entire page */
+        body {
+            background-color: #f0f9ff;  /* Light blue color */
+            min-height: 100vh;
+        }
+    
+        .tab-content { 
+            display: none; 
+        }
+        .tab-content.active { 
+            display: block; 
+        }
+        .tab-link.active { 
+            border-bottom: 2px solid #3b82f6;
+            color: #3b82f6;
+        }
+    
+        /* Optional: Add subtle shadow to the white container */
+        .bg-white {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-6">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="mb-4 p-4 rounded-lg {{ 'bg-green-100 text-green-800' if category == 'success' else 'bg-red-100 text-red-800' }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+           <!-- Header -->
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Patient Assessment</h1>
+    <div class="flex gap-2">
+        <a href="{{ url_for('clinic_dashboard') }}" 
+           class="bg-blue-300 text-white-800 px-4 py-2 rounded-md hover:bg-blue-400">
+            <i class="fas fa-arrow-left mr-2"></i>Back
+        </a>
+        <button onclick="window.print()" 
+                class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+            <i class="fas fa-print mr-2"></i>Print
+        </button>
+    </div>
+</div>
+
+
+            <!-- Tabs -->
+            <div class="mb-6">
+                <div class="flex border-b">
+                    <button class="tab-link px-4 py-2 font-medium active" data-target="new-assessment">New Assessment</button>
+                    <button class="tab-link px-4 py-2 font-medium" data-target="assessment-history">History</button>
+                </div>
+            </div>
+
+            <!-- New Assessment Form -->
+            <div id="new-assessment" class="tab-content active">
+                <form method="POST" action="/patient-assessment" enctype="multipart/form-data">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Patient Selection -->
+                        <div>
+                            <label for="patient" class="block text-sm font-medium text-gray-700 mb-2">Select Patient</label>
+                            <select name="patient" class="w-full p-2 border rounded-md" required>
+                              <option value="">-- Select --</option>
+                              {% for name in patient_names %}
+                                <option value="{{ name }}">{{ name }}</option>
+                              {% endfor %}
+                            </select>
+                          </div>
+                          
+
+                        <!-- Assessment Date -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                            <input type="date" name="date" value="{{ datetime.utcnow().strftime('%Y-%m-%d') }}" 
+                                   class="w-full p-2 border rounded-md" required>
+                        </div>
+                    </div>
+
+                    <!-- Symptoms -->
+                    <div class="my-6">
+                        <h3 class="text-lg font-semibold mb-4">Symptoms</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {% for symptom in ['Cough', 'Fever', 'Shortness of Breath', 
+                                             'Chest Pain', 'Fatigue', 'Headache'] %}
+                            <label class="flex items-center">
+                                <input type="checkbox" name="symptoms" value="{{ symptom }}" 
+                                       class="mr-2">
+                                {{ symptom }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Vital Signs -->
+                    <div class="my-6">
+                        <h3 class="text-lg font-semibold mb-4">Vital Signs</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Temperature (°C)</label>
+                                <input type="number" step="0.1" name="temperature" 
+                                       class="w-full p-2 border rounded-md" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Heart Rate (bpm)</label>
+                                <input type="number" name="heart_rate" 
+                                       class="w-full p-2 border rounded-md" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Respiratory Rate</label>
+                                <input type="number" name="respiratory_rate" 
+                                       class="w-full p-2 border rounded-md" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">O₂ Saturation (%)</label>
+                                <input type="number" name="oxygen_saturation" 
+                                       class="w-full p-2 border rounded-md" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Blood Pressure</label>
+                                <input type="text" name="blood_pressure" 
+                                       class="w-full p-2 border rounded-md" required>
+                            </div>
+                        </div>
+                    </div>
+
+           <!-- X-ray Upload Section -->
+<div class="my-6">
+    <h3 class="text-lg font-semibold mb-4 text-gray-800">X-ray Image</h3>
+    <div class="mt-1">
+        <input 
+            type="file" 
+            name="xray_image" 
+            accept="image/*" 
+            required 
+            class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+        <p class="text-sm text-gray-500 mt-1">Upload JPEG or PNG image (max 5MB)</p>
+    </div>
+</div>
+
+
+                    <!-- Diagnosis and Notes -->
+                    <div class="my-6">
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Diagnosis</label>
+                                <select name="diagnosis" class="w-full p-2 border rounded-md" required>
+                                    <option value="">Select Diagnosis</option>
+                                    <option value="Bacterial Pneumonia">Bacterial Pneumonia</option>
+                                    <option value="Viral Pneumonia">Viral Pneumonia</option>
+                                    <option value="Other">Normal</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                                <textarea name="notes" class="w-full p-2 border rounded-md h-32"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="mt-6">
+                        <button type="submit" 
+                                class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600">
+                            Save Assessment
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+           <!-- Assessment History -->
+<div id="assessment-history" class="tab-content">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Patient</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Diagnosis</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">O₂ Level</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for assessment in assessments %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ assessment.patient_name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ assessment.date.strftime('%Y-%m-%d') }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ assessment.diagnosis }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ assessment.vitals.oxygen_saturation }}%</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            {{ 'bg-green-100 text-green-800' if assessment.status.lower() == 'completed' 
+                            else 'bg-blue-100 text-blue-800' if assessment.status.lower() == 'pending review'
+                            else 'bg-gray-100 text-gray-800' }}">
+                            {{ assessment.status or 'Pending Review' }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+    <script>
+        // Tab functionality
+        document.querySelectorAll('.tab-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                const target = document.getElementById(link.dataset.target);
+                
+                // Remove active classes
+                document.querySelectorAll('.tab-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active classes
+                link.classList.add('active');
+                target.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
