@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Clinics Management - PneumoAid</title>
+
     <style>
         :root {
             --primary: #2A4365;
+            --primary-hover: #2C5282;
             --secondary: #718096;
+            --success: #48BB78;
+            --danger: #F56565;
+            --background: #f7fafc;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
@@ -16,8 +27,12 @@
             display: grid;
             grid-template-columns: 250px 1fr;
             min-height: 100vh;
-            background: #f7fafc;
+            background: var(--background);
         }
+
+        /* ============================================================
+           SIDEBAR
+        ============================================================ */
 
         .sidebar {
             background: var(--primary);
@@ -25,17 +40,120 @@
             padding: 20px;
         }
 
-        .main-content {
-            padding: 20px;
+        .sidebar h2 {
+            margin-top: 0;
+            margin-bottom: 30px;
         }
+
+        .nav-item {
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--primary-hover);
+        }
+
+        /* ============================================================
+           MAIN CONTENT
+        ============================================================ */
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            color: var(--primary);
+        }
+
+        /* ============================================================
+           BUTTONS
+        ============================================================ */
+
+        button {
+            font-family: inherit;
+        }
+
+        .add-clinic-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .add-clinic-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .edit-btn {
+            background: #4299E1;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .edit-btn:hover {
+            background: #3182CE;
+        }
+
+        .cancel-btn {
+            background: #718096;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .cancel-btn:hover {
+            background: #4A5568;
+        }
+
+        .delete-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .delete-btn:hover {
+            background: #C53030;
+        }
+
+        /* ============================================================
+           FORM
+        ============================================================ */
 
         .clinic-form-container {
             background: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
             display: none;
+        }
+
+        .clinic-form-container h2 {
+            color: var(--primary);
+            margin-top: 0;
         }
 
         .form-section {
@@ -43,6 +161,11 @@
             padding: 15px;
             border: 1px solid #eee;
             border-radius: 8px;
+        }
+
+        .form-section h3 {
+            margin-top: 0;
+            color: var(--primary);
         }
 
         .form-group {
@@ -58,59 +181,45 @@
         .form-group input,
         .form-group select {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            font-size: 14px;
         }
 
-        .add-clinic-btn {
-            background: #2A4365;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-
-        .clinic-list {
-            display: grid;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .clinic-card {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: grid;
-            grid-template-columns: 100px 1fr;
-            gap: 15px;
-        }
-
-        .clinic-image {
-            width: 100%;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-
-        .nav-item {
-            padding: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .nav-item:hover {
-            background: #2C5282;
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
         }
 
         .error-message {
-            color: #dc3545;
+            color: var(--danger);
             margin-top: 5px;
             font-size: 0.9em;
         }
+
+        .form-notice {
+            background: #FFF8E1;
+            padding: 12px;
+            border-radius: 6px;
+            color: #744210;
+            font-size: 14px;
+        }
+
+        .form-notice p {
+            margin-top: 0;
+            font-weight: bold;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* ============================================================
+           CLINIC LIST
+        ============================================================ */
 
         .clinic-list {
             margin-top: 2rem;
@@ -122,34 +231,37 @@
             background: white;
             padding: 1.5rem;
             border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+
             display: grid;
-            grid-template-columns: 120px 1fr;
+            grid-template-columns: 120px 1fr auto;
             gap: 1.5rem;
-            align-items: start;
+            align-items: center;
         }
 
         .clinic-image {
-            width: 100%;
+            width: 120px;
             height: 120px;
             object-fit: cover;
             border-radius: 6px;
         }
 
         .clinic-image-placeholder {
-            width: 100%;
+            width: 120px;
             height: 120px;
             background: #f0f4f8;
             border-radius: 6px;
+
             display: flex;
             align-items: center;
             justify-content: center;
+
             color: #718096;
         }
 
         .clinic-info h3 {
             margin: 0 0 0.5rem 0;
-            color: #2A4365;
+            color: var(--primary);
         }
 
         .clinic-info p {
@@ -158,44 +270,53 @@
         }
 
         .status-active {
-            color: #48BB78;
-            font-weight: 500;
+            color: var(--success);
+            font-weight: 600;
         }
 
         .status-inactive {
-            color: #F56565;
-            font-weight: 500;
+            color: var(--danger);
+            font-weight: 600;
         }
 
-        .error {
-            color: #F56565;
-            padding: 1rem;
-            background: #FFF5F5;
-            border-radius: 6px;
+        .clinic-actions {
+            display: flex;
+            align-items: center;
         }
-        /* New CSS for the Modal */
+
+        /* ============================================================
+           MODAL
+        ============================================================ */
+
         .modal {
             display: none;
             position: fixed;
             z-index: 1000;
+
             left: 0;
             top: 0;
+
             width: 100%;
             height: 100%;
-            overflow: auto;
+
             background-color: rgba(0, 0, 0, 0.4);
+
             align-items: center;
             justify-content: center;
         }
 
         .modal-content {
             background-color: #fefefe;
-            margin: auto;
+
             padding: 20px;
+
             border-radius: 8px;
+
             width: 80%;
             max-width: 400px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
             text-align: center;
         }
 
@@ -217,7 +338,7 @@
         }
 
         #confirmYes {
-            background-color: #F56565;
+            background-color: var(--danger);
             color: white;
         }
 
@@ -226,218 +347,865 @@
             color: white;
         }
 
+        /* ============================================================
+           RESPONSIVE
+        ============================================================ */
+
+        @media (max-width: 800px) {
+
+            body {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                padding: 15px;
+            }
+
+            .clinic-card {
+                grid-template-columns: 90px 1fr;
+            }
+
+            .clinic-image,
+            .clinic-image-placeholder {
+                width: 90px;
+                height: 90px;
+            }
+
+            .clinic-actions {
+                grid-column: 1 / -1;
+            }
+        }
     </style>
 </head>
+
 <body>
+
+    <!-- ============================================================
+         SIDEBAR
+    ============================================================ -->
+
     <div class="sidebar">
+
         <h2>PneumoAid</h2>
-        <div class="nav-item" onclick="window.location.href='/dashboard'">Dashboard</div>
-        <div class="nav-item" onclick="window.location.href='/clinics'">Clinics</div>
-        <div class="nav-item" onclick="confirmLogout()">Logout</div>
+
+        <div class="nav-item" onclick="window.location.href='/dashboard'">
+            Dashboard
+        </div>
+
+        <div class="nav-item" onclick="window.location.href='/clinics'">
+            Clinics
+        </div>
+
+        <div class="nav-item" onclick="confirmLogout()">
+            Logout
+        </div>
+
     </div>
+
+
+    <!-- ============================================================
+         MAIN CONTENT
+    ============================================================ -->
 
     <div class="main-content">
-       <button class="add-clinic-btn" type="button" onclick="toggleForm()">Add New Clinic</button>
-        
-        <div class="clinic-form-container" id="clinicForm">
-            <h2>Register New Clinic</h2>
-            
-            <form enctype="multipart/form-data" onsubmit="submitClinicForm(); return false;">
-                <div class="form-section">
-                    <h3>Clinic Information</h3>
-                    <div class="form-group">
-                        <label>Clinic Name:</label>
-                        <input type="text" id="clinicName" name="name" required>
-                        <div class="error-message" id="nameError"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>Clinic Identifier:</label>
-                        <input type="text" id="clinicId" name="identifier" required>
-                        <div class="error-message" id="idError"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>Location (City, State):</label>
-                        <input type="text" id="clinicLocation" name="location" required>
-                        <div class="error-message" id="locationError"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>Clinic Type:</label>
-                        <select id="clinicType" name="type">
-                        <option value="government">Government</option>
-                        <option value="private">Private</option>
-                        <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Clinic Image:</label>
-                        <input type="file" name="image" id="clinicImage" accept="image/*" required>
-                        <div class="error-message" id="imageError"></div>
-                    </div>
-                </div>
-    
-                <div class="form-section">
-                    <h3>Authentication Credentials</h3>
-                    <div class="form-group">
-                        <label>Username:</label>
-                        <input type="text" id="clinicUsername" name="username" required>
-                        <div class="error-message" id="usernameError"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>Password:</label>
-                        <input type="password" id="clinicPassword" name="password" required>
-                        <div class="error-message" id="passwordError"></div>
-                    </div>
-                    <div class="form-notice">
-                        <p>⚠️ Important information:</p>
-                        <ul>
-                            <li>Each clinic requires unique login credentials</li>
-                            <li>Store these credentials securely</li>
-                            <li>Credentials cannot be recovered if lost</li>
-                        </ul>
-                    </div>
-                </div>
-    
-                <div class="form-actions">
-                    <button class="add-clinic-btn" type="submit">Register Clinic</button>
-                    <button class="add-clinic-btn" type="button" onclick="toggleForm()">Cancel</button>
-                </div>
-            </form>
+
+        <div class="page-header">
+
+            <h1>Clinic Management</h1>
+
+            <button class="add-clinic-btn" type="button" onclick="startAddClinic()">
+                Add New Clinic
+            </button>
+
         </div>
-        
-        <div class="clinic-list" id="clinicList">
+
+
+        <!-- ========================================================
+             CLINIC FORM
+        ========================================================= -->
+
+        <div class="clinic-form-container" id="clinicForm">
+
+            <h2 id="formTitle">
+                Register New Clinic
+            </h2>
+
+
+            <form id="clinicFormElement" enctype="multipart/form-data" onsubmit="submitClinicForm(event)">
+
+                <!-- Hidden ID used during editing -->
+                <input type="hidden" id="clinicDatabaseId" name="clinic_id">
+
+
+                <!-- =================================================
+                     CLINIC INFORMATION
+                ================================================== -->
+
+                <div class="form-section">
+
+                    <h3>Clinic Information</h3>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Clinic Name:
+                        </label>
+
+                        <input type="text" id="clinicName" name="name" required>
+
+                        <div class="error-message" id="nameError">
+                        </div>
+
                     </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Clinic Identifier:
+                        </label>
+
+                        <input type="text" id="clinicId" name="identifier" required>
+
+                        <div class="error-message" id="idError">
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Location (City, State):
+                        </label>
+
+                        <input type="text" id="clinicLocation" name="location" required>
+
+                        <div class="error-message" id="locationError">
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Clinic Type:
+                        </label>
+
+                        <select id="clinicType" name="type">
+
+                            <option value="government">
+                                Government
+                            </option>
+
+                            <option value="private">
+                                Private
+                            </option>
+
+                            <option value="other">
+                                Other
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Clinic Status:
+                        </label>
+
+                        <select id="clinicStatus" name="status">
+
+                            <option value="active">
+                                Active
+                            </option>
+
+                            <option value="inactive">
+                                Inactive
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Clinic Image:
+                        </label>
+
+                        <input type="file" name="image" id="clinicImage" accept="image/*">
+
+                        <div id="imageHelp" style="
+                                margin-top:5px;
+                                color:#718096;
+                                font-size:13px;
+                            ">
+                            Select an image for the clinic.
+                        </div>
+
+                        <div class="error-message" id="imageError">
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     AUTHENTICATION
+                ================================================== -->
+
+                <div class="form-section">
+
+                    <h3>
+                        Authentication Credentials
+                    </h3>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Username:
+                        </label>
+
+                        <input type="text" id="clinicUsername" name="username" required>
+
+                        <div class="error-message" id="usernameError">
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>
+                            Password:
+                        </label>
+
+                        <input type="password" id="clinicPassword" name="password">
+
+                        <div id="passwordHelp" style="
+                                margin-top:5px;
+                                color:#718096;
+                                font-size:13px;
+                            ">
+                        </div>
+
+                        <div class="error-message" id="passwordError">
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     FORM ACTIONS
+                ================================================== -->
+
+                <div class="form-actions">
+
+                    <button class="add-clinic-btn" id="submitButton" type="submit">
+                        Register Clinic
+                    </button>
+
+                    <button class="cancel-btn" type="button" onclick="cancelForm()">
+                        Cancel
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <!-- ========================================================
+             CLINIC LIST
+        ========================================================= -->
+
+        <div class="clinic-list" id="clinicList">
+        </div>
+
     </div>
 
-        <div id="logoutModal" class="modal">
+
+    <!-- ============================================================
+         LOGOUT MODAL
+    ============================================================= -->
+
+    <div id="logoutModal" class="modal">
+
         <div class="modal-content">
-            <h3>Confirm Logout</h3>
-            <p>Are you sure you want to log out?</p>
+
+            <h3>
+                Confirm Logout
+            </h3>
+
+            <p>
+                Are you sure you want to log out?
+            </p>
+
             <div class="modal-buttons">
-                <button id="confirmYes" onclick="performLogout()">Yes</button>
-                <button id="confirmNo" onclick="cancelLogout()">No</button>
+
+                <button id="confirmYes" onclick="performLogout()">
+                    Yes
+                </button>
+
+                <button id="confirmNo" onclick="cancelLogout()">
+                    No
+                </button>
+
             </div>
+
         </div>
+
     </div>
+
+
+    <!-- ============================================================
+         JAVASCRIPT
+    ============================================================= -->
 
     <script>
-        function toggleForm() {
-            const form = document.getElementById('clinicForm');
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
-            clearErrors();
-        }
 
-        function clearErrors() {
-            document.querySelectorAll('.error-message').forEach(el => {
-                el.textContent = '';
+        let editingClinicId = null;
+
+
+        /* ============================================================
+           FORM MODE
+        ============================================================ */
+
+        function startAddClinic() {
+
+            editingClinicId = null;
+
+            const form = document.getElementById('clinicForm');
+
+            form.style.display = 'block';
+
+            document.getElementById('formTitle').textContent =
+                'Register New Clinic';
+
+            document.getElementById('submitButton').textContent =
+                'Register Clinic';
+
+            document.getElementById('clinicFormElement').reset();
+
+            document.getElementById('clinicDatabaseId').value = '';
+
+            document.getElementById('clinicImage').required = true;
+
+            document.getElementById('passwordHelp').textContent =
+                'Password is required for a new clinic.';
+
+            document.getElementById('imageHelp').textContent =
+                'Select an image for the clinic.';
+
+            clearErrors();
+
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
             });
         }
-        async function submitClinicForm() {
+
+
+        function startEditClinic(clinic) {
+
+            editingClinicId = clinic._id;
+
+            const form = document.getElementById('clinicForm');
+
+            form.style.display = 'block';
+
+            document.getElementById('formTitle').textContent =
+                'Edit Clinic';
+
+            document.getElementById('submitButton').textContent =
+                'Update Clinic';
+
+            document.getElementById('clinicDatabaseId').value =
+                clinic._id;
+
+            document.getElementById('clinicName').value =
+                clinic.name || '';
+
+            document.getElementById('clinicId').value =
+                clinic.identifier || '';
+
+            document.getElementById('clinicLocation').value =
+                clinic.location || '';
+
+            document.getElementById('clinicType').value =
+                clinic.type || 'other';
+
+            document.getElementById('clinicStatus').value =
+                clinic.status || 'active';
+
+            document.getElementById('clinicUsername').value =
+                clinic.username || '';
+
+            /*
+             * Password remains empty during editing.
+             * Empty means "keep existing password".
+             */
+            document.getElementById('clinicPassword').value = '';
+
+            document.getElementById('clinicImage').required = false;
+
+            document.getElementById('passwordHelp').textContent =
+                'Leave blank to keep the existing password.';
+
+            document.getElementById('imageHelp').textContent =
+                'Leave empty to keep the existing clinic image.';
+
             clearErrors();
-            
-            // Get form elements
-            const formElement = document.querySelector('form');
-            const formData = new FormData(formElement);
-            
-            // Get validation elements
-            const clinicName = document.getElementById('clinicName');
-            const clinicId = document.getElementById('clinicId');
-            const clinicLocation = document.getElementById('clinicLocation');
-            const clinicUsername = document.getElementById('clinicUsername');
-            const clinicPassword = document.getElementById('clinicPassword');
-            const clinicImage = document.getElementById('clinicImage'); // Add id to file input in HTML
 
-            // Basic validation
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+
+        function cancelForm() {
+
+            editingClinicId = null;
+
+            document.getElementById('clinicForm').style.display =
+                'none';
+
+            document.getElementById('clinicFormElement').reset();
+
+            clearErrors();
+        }
+
+
+        /* ============================================================
+           VALIDATION
+        ============================================================ */
+
+        function clearErrors() {
+
+            document
+                .querySelectorAll('.error-message')
+                .forEach(el => {
+                    el.textContent = '';
+                });
+        }
+
+
+        /* ============================================================
+           SUBMIT FORM
+        ============================================================ */
+
+        async function submitClinicForm(event) {
+
+            event.preventDefault();
+
+            clearErrors();
+
+            const formElement =
+                document.getElementById('clinicFormElement');
+
+            const formData =
+                new FormData(formElement);
+
+
+            const clinicName =
+                document.getElementById('clinicName');
+
+            const clinicId =
+                document.getElementById('clinicId');
+
+            const clinicLocation =
+                document.getElementById('clinicLocation');
+
+            const clinicUsername =
+                document.getElementById('clinicUsername');
+
+            const clinicPassword =
+                document.getElementById('clinicPassword');
+
+            const clinicImage =
+                document.getElementById('clinicImage');
+
+
             let isValid = true;
+
+
+            /* --------------------------------------------------------
+               Required fields
+            -------------------------------------------------------- */
+
             if (!clinicName.value.trim()) {
-                document.getElementById('nameError').textContent = 'Clinic name is required';
-                isValid = false;
-            }
-            if (!clinicId.value.trim()) {
-                document.getElementById('idError').textContent = 'Identifier is required';
-                isValid = false;
-            }
-            if (!clinicLocation.value.trim()) {
-                document.getElementById('locationError').textContent = 'Location is required';
-                isValid = false;
-            }
-            if (!clinicUsername.value.trim()) {
-                document.getElementById('usernameError').textContent = 'Username is required';
-                isValid = false;
-            }
-            if (!clinicPassword.value.trim()) {
-                document.getElementById('passwordError').textContent = 'Password is required';
-                isValid = false;
-            }
-            if (!clinicImage.files[0]) { // Check if file is selected
-                document.getElementById('imageError').textContent = 'Image is required';
+
+                document.getElementById('nameError').textContent =
+                    'Clinic name is required';
+
                 isValid = false;
             }
 
-            if (!isValid) return;
+
+            if (!clinicId.value.trim()) {
+
+                document.getElementById('idError').textContent =
+                    'Identifier is required';
+
+                isValid = false;
+            }
+
+
+            if (!clinicLocation.value.trim()) {
+
+                document.getElementById('locationError').textContent =
+                    'Location is required';
+
+                isValid = false;
+            }
+
+
+            if (!clinicUsername.value.trim()) {
+
+                document.getElementById('usernameError').textContent =
+                    'Username is required';
+
+                isValid = false;
+            }
+
+
+            /*
+             * Password required only when creating.
+             */
+            if (!editingClinicId &&
+                !clinicPassword.value.trim()) {
+
+                document.getElementById('passwordError').textContent =
+                    'Password is required';
+
+                isValid = false;
+            }
+
+
+            /*
+             * Image required only when creating.
+             */
+            if (!editingClinicId &&
+                !clinicImage.files[0]) {
+
+                document.getElementById('imageError').textContent =
+                    'Image is required';
+
+                isValid = false;
+            }
+
+
+            if (!isValid) {
+                return;
+            }
+
+
+            /* --------------------------------------------------------
+               Determine HTTP method
+            -------------------------------------------------------- */
+
+            const method =
+                editingClinicId ? 'PUT' : 'POST';
+
 
             try {
-                const response = await fetch('/api/clinics', {
-                    method: 'POST',
-                    body: formData // Send FormData instead of JSON
-                    // Don't set Content-Type header - let browser set it automatically
-                });
 
-                const data = await response.json();
+                const response =
+                    await fetch('/api/clinics', {
+                        method: method,
+                        body: formData
+                    });
+
+
+                const data =
+                    await response.json();
+
 
                 if (response.ok) {
-                    alert('Clinic registered successfully!');
-                    toggleForm();
-                    loadClinics();
-                } else {
-                    if (data.error.includes('username')) {
-                        document.getElementById('usernameError').textContent = data.error;
+
+                    if (editingClinicId) {
+
+                        alert(
+                            'Clinic updated successfully!'
+                        );
+
                     } else {
-                        alert('Error: ' + data.error);
+
+                        alert(
+                            'Clinic registered successfully!'
+                        );
+                    }
+
+
+                    cancelForm();
+
+                    loadClinics();
+
+                } else {
+
+                    if (
+                        data.error &&
+                        data.error.toLowerCase()
+                            .includes('username')
+                    ) {
+
+                        document.getElementById(
+                            'usernameError'
+                        ).textContent =
+                            data.error;
+
+                    } else {
+
+                        alert(
+                            'Error: ' +
+                            (data.error || 'Unknown error')
+                        );
                     }
                 }
+
             } catch (error) {
+
                 console.error('Error:', error);
-                alert('Failed to connect to server');
+
+                alert(
+                    'Failed to connect to server'
+                );
             }
         }
-        
-        // New functions to handle the modal
-        function confirmLogout() {
-            document.getElementById('logoutModal').style.display = 'flex';
+
+
+        /* ============================================================
+           LOAD CLINICS
+        ============================================================ */
+
+        async function loadClinics() {
+
+            try {
+
+                const response =
+                    await fetch('/api/clinics');
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        'Failed to load clinics'
+                    );
+                }
+
+
+                const clinics =
+                    await response.json();
+
+
+                const clinicList =
+                    document.getElementById(
+                        'clinicList'
+                    );
+
+
+                if (!clinics.length) {
+
+                    clinicList.innerHTML = `
+                        <div style="
+                            background:white;
+                            padding:30px;
+                            border-radius:8px;
+                            text-align:center;
+                            color:#718096;
+                        ">
+                            No clinics registered yet.
+                        </div>
+                    `;
+
+                    return;
+                }
+
+
+                clinicList.innerHTML =
+                    clinics.map(clinic => {
+
+                        const statusClass =
+                            clinic.status === 'active'
+                                ? 'status-active'
+                                : 'status-inactive';
+
+
+                        const image =
+                            (clinic.image_url || clinic.image_source)
+                                ? `
+                                    <img
+                                        src="${clinic.image_url || clinic.image_source}"
+                                        class="clinic-image"
+                                        alt="${clinic.name}"
+                                    >
+                                  `
+                                : `
+                                    <div class="clinic-image-placeholder">
+                                        No Image
+                                    </div>
+                                  `;
+
+
+                        return `
+                            <div class="clinic-card">
+
+                                ${image}
+
+                                <div class="clinic-info">
+
+                                    <h3>
+                                        ${clinic.name || 'Unnamed Clinic'}
+                                    </h3>
+
+                                    <p>
+                                        <strong>ID:</strong>
+                                        ${clinic.identifier || '-'}
+                                    </p>
+
+                                    <p>
+                                        <strong>Location:</strong>
+                                        ${clinic.location || '-'}
+                                    </p>
+
+                                    <p>
+                                        <strong>Type:</strong>
+                                        ${clinic.type || 'Other'}
+                                    </p>
+
+                                    <p>
+                                        <strong>Status:</strong>
+
+                                        <span class="${statusClass}">
+                                            ${clinic.status || 'active'}
+                                        </span>
+                                    </p>
+
+                                    <p>
+                                        <strong>Username:</strong>
+                                        ${clinic.username || '-'}
+                                    </p>
+
+                                </div>
+
+                                <div class="clinic-actions">
+
+                                    <button
+                                        class="edit-btn"
+                                        onclick='startEditClinic(${JSON.stringify(clinic)})'>
+                                        Edit
+                                    </button>
+
+                                    <button
+                                        class="delete-btn"
+                                        onclick="deleteClinic('${clinic._id}')">
+                                        Delete
+                                    </button>
+
+                                </div>
+
+                            </div>
+                        `;
+
+                    }).join('');
+
+            } catch (error) {
+
+                console.error(
+                    'Error loading clinics:',
+                    error
+                );
+
+                document.getElementById(
+                    'clinicList'
+                ).innerHTML = `
+                    <div class="error-message">
+                        Failed to load clinics.
+                    </div>
+                `;
+            }
         }
 
+
+        /* ============================================================
+           LOGOUT
+        ============================================================ */
+
+        function confirmLogout() {
+
+            document.getElementById(
+                'logoutModal'
+            ).style.display = 'flex';
+        }
+
+
         function performLogout() {
+
             window.location.href = '/logout';
         }
 
+
         function cancelLogout() {
-            document.getElementById('logoutModal').style.display = 'none';
+
+            document.getElementById(
+                'logoutModal'
+            ).style.display = 'none';
         }
 
-        async function loadClinics() {
+        /* ============================================================
+           DELETE CLINIC
+        ============================================================ */
+
+        async function deleteClinic(clinicId) {
+            if (!confirm('Are you sure you want to delete this clinic?')) {
+                return;
+            }
+            
             try {
-                const response = await fetch('/api/clinics');
-                const clinics = await response.json();
+                const response = await fetch(`/api/clinics?clinic_id=${clinicId}`, {
+                    method: 'DELETE'
+                });
                 
-                const clinicList = document.getElementById('clinicList');
-                clinicList.innerHTML = clinics.map(clinic => `
-                    <div class="clinic-card">
-                        ${clinic.image_url ? `<img src="${clinic.image_url}" class="clinic-image" alt="${clinic.name}">` : '<div class="clinic-image"></div>'}
-                        <div>
-                            <h3>${clinic.name}</h3>
-                            <p>ID: ${clinic.identifier}</p>
-                            <p>Location: ${clinic.location}</p>
-                            <p>Status: ${clinic.status}</p>
-                        </div>
-                    </div>
-                `).join('');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Clinic deleted successfully!');
+                    loadClinics();
+                } else {
+                    alert('Error: ' + (data.error || 'Unknown error'));
+                }
             } catch (error) {
-                console.error('Error loading clinics:', error);
+                console.error('Error deleting clinic:', error);
+                alert('Failed to connect to server');
             }
         }
 
-        // Initial load
+
+        /* ============================================================
+           INITIAL LOAD
+        ============================================================ */
+
         loadClinics();
+
     </script>
+
 </body>
+
 </html>

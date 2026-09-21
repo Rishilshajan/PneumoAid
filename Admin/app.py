@@ -83,79 +83,232 @@ def clinics_page():
         return redirect(url_for('login'))
     return render_template('clinics.html')
 
-@app.route('/api/clinics', methods=['GET', 'POST'])
+@app.route('/api/clinics', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def handle_clinics():
     if not session.get('logged_in'):
         return jsonify({'error': 'Unauthorized'}), 401
-    
-    try:
-        if request.method == 'POST':
-            # Handle file upload to Cloudinary
-            if 'image' not in request.files:
-                return jsonify({"error": "No image provided"}), 400
-                
-            file = request.files['image']
-            if file.filename == '':
-                return jsonify({"error": "No selected image"}), 400
-                
-            # Note: We can skip the allowed_file check as Cloudinary handles many formats
-            # and you can configure allowed types on their dashboard.
 
-            # Upload the image file to Cloudinary
-            # The 'folder' parameter organizes your uploads in Cloudinary
-            upload_result = cloudinary.uploader.upload(file, folder="pneumoaid_clinics")
-            
-            # Get the secure URL from the Cloudinary response
+    try:
+        # ============================================================
+        # GET - Fetch all clinics
+        # ============================================================
+        if request.method == 'GET':
+
+            clinics = list(
+                mongo.db.clinics.find(
+                    {},
+                    {'password': 0}
+                )
+            )
+
+            for clinic in clinics:
+                clinic['_id'] = str(clinic['_id'])
+
+                if 'image_url' not in clinic:
+                    clinic['image_url'] = None
+
+            return jsonify(clinics), 200
+
+        # ============================================================
+        # POST - Create a new clinic
+        # ============================================================
+        elif request.method == 'POST':
+
+            if 'image' not in request.files:
+                return jsonify({
+                    "error": "No image provided"
+                }), 400
+
+            file = request.files['image']
+
+            if file.filename == '':
+                return jsonify({
+                    "error": "No selected image"
+                }), 400
+
+            # Upload image to Cloudinary
+            upload_result = cloudinary.uploader.upload(
+                file,
+                folder="pneumoaid_clinics"
+            )
+
             image_url = upload_result['secure_url']
 
-            # Get form data
             clinic_data = {
                 "name": request.form.get('name'),
                 "identifier": request.form.get('identifier'),
                 "location": request.form.get('location'),
+                "type": request.form.get('type', 'other'),
                 "status": request.form.get('status', 'active'),
-                "image_url": image_url, # Store the Cloudinary URL
+                "image_url": image_url,
                 "username": request.form.get('username'),
-                "password": generate_password_hash(request.form.get('password'))
+                "password": generate_password_hash(
+                    request.form.get('password')
+                )
             }
 
-            # Validate required fields
-            required_fields = ["name", "identifier", "location", "username", "password"]
-            missing_fields = [field for field in required_fields if not clinic_data.get(field)]
+            required_fields = [
+                "name",
+                "identifier",
+                "location",
+                "username",
+                "password"
+            ]
+
+            missing_fields = [
+                field
+                for field in required_fields
+                if not clinic_data.get(field)
+            ]
+
             if missing_fields:
-                return jsonify({"error": f"Missing required fields: {', '.join(missing_fields)}"}), 400
+                return jsonify({
+                    "error": f"Missing required fields: {', '.join(missing_fields)}"
+                }), 400
 
-            # Check for existing username
-            if mongo.db.clinics.find_one({"username": clinic_data['username']}):
-                return jsonify({"error": "Username already exists"}), 409
+            # Check duplicate username
+            if mongo.db.clinics.find_one({
+                "username": clinic_data['username']
+            }):
+                return jsonify({
+                    "error": "Username already exists"
+                }), 409
 
-            # Insert into database
             result = mongo.db.clinics.insert_one(clinic_data)
-            
+
             return jsonify({
                 "message": "Clinic created successfully",
                 "id": str(result.inserted_id),
                 "image_url": image_url
             }), 201
 
-        elif request.method == 'GET':
-            # Retrieve all clinics from the database
-            clinics = list(mongo.db.clinics.find({}, {'password': 0}))
+        # ============================================================
+        # PUT - Update an existing clinic
+        # ============================================================
+        elif request.method == 'PUT':
+
+            clinic_id = request.form.get('clinic_id')
+
+            if not clinic_id:
+                return jsonify({
+                    "error": "Clinic ID is required"
+                }), 400
+
+            try:
+                object_id = ObjectId(clinic_id)
+            except Exception:
+                return jsonify({
+                    "error": "Invalid clinic ID"
+                }), 400
+
+            # Check if clinic exists
+            existing_clinic = mongo.db.clinics.find_one({
+                "_id": object_id
+            })
+
+            if not existing_clinic:
+                return jsonify({
+                    "error": "Clinic not found"
+                }), 404
+
+            # --------------------------------------------------------
+            # Check username uniqueness
+            # --------------------------------------------------------
+            username = request.form.get('username')
+
+            if username:
+                existing_username = mongo.db.clinics.find_one({
+                    "username": username,
+                    "_id": {"$ne": object_id}
+                })
+
+                if existing_username:
+                    return jsonify({
+                        "error": "Username already exists"
+                    }), 409
+
+            # --------------------------------------------------------
+            # Prepare fields to update
+            # --------------------------------------------------------
+            update_data = {
+                "name": request.form.get('name'),
+                "identifier": request.form.get('identifier'),
+                "location": request.form.get('location'),
+                "type": request.form.get('type', 'other'),
+                "status": request.form.get('status', 'active'),
+                "username": username
+            }
+
+            # --------------------------------------------------------
+            # Password
+            # Only update password if user entered a new password
+            # --------------------------------------------------------
+            new_password = request.form.get('password')
+
+            if new_password and new_password.strip():
+                update_data["password"] = generate_password_hash(
+                    new_password
+                )
+
+            # --------------------------------------------------------
+            # Image
+            # Only upload if a new image was selected
+            # --------------------------------------------------------
+            if 'image' in request.files:
+
+                file = request.files['image']
+
+                if file and file.filename:
+
+                    upload_result = cloudinary.uploader.upload(
+                        file,
+                        folder="pneumoaid_clinics"
+                    )
+
+                    update_data["image_url"] = upload_result['secure_url']
+
+            # --------------------------------------------------------
+            # Update MongoDB
+            # --------------------------------------------------------
+            mongo.db.clinics.update_one(
+                {"_id": object_id},
+                {"$set": update_data}
+            )
+
+            return jsonify({
+                "message": "Clinic updated successfully"
+            }), 200
+
+        # ============================================================
+        # DELETE - Delete an existing clinic
+        # ============================================================
+        elif request.method == 'DELETE':
+            clinic_id = request.args.get('clinic_id')
             
-            # Prepare data for the frontend
-            for clinic in clinics:
-                clinic['_id'] = str(clinic['_id'])
-                # The image URL is now a direct property, so no construction is needed
-                # Ensure it exists before trying to access it
-                if 'image_url' not in clinic:
-                    clinic['image_url'] = None
-                    
-            return jsonify(clinics), 200
+            if not clinic_id:
+                return jsonify({
+                    "error": "Clinic ID is required"
+                }), 400
+                
+            try:
+                object_id = ObjectId(clinic_id)
+            except Exception:
+                return jsonify({
+                    "error": "Invalid clinic ID"
+                }), 400
+                
+            mongo.db.clinics.delete_one({"_id": object_id})
+            
+            return jsonify({
+                "message": "Clinic deleted successfully"
+            }), 200
 
     except Exception as e:
-        # A simple error response if something goes wrong
-        return jsonify({'error': str(e)}), 500
+        print(f"Clinic API error: {e}")
 
+        return jsonify({
+            "error": str(e)
+        }), 500
 
 # ======================== DATA ENDPOINTS ========================
 @app.route("/api/stats")
