@@ -9,3 +9,4 @@ gdown==4.7.3
 protobuf==4.25.8
 grpcio==1.62.3
 gunicorn==26.2.0
+Flask-Mail==0.10.0
