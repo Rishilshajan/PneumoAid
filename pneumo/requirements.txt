@@ -12,3 +12,5 @@ gunicorn==26.2.0
 Flask-Mail==0.10.0
 openai==3.16.2
 python-dateutil==2.9.0.post0
+Flask-CORS==6.0.1
+tf-keras==2.16.0
